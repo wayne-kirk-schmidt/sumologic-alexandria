@@ -4,14 +4,11 @@ SumoLogic Toshokan
 SumoLogic is a suite of tools to query, extract, organize, and query against SumoLogic content.
 The goal of the scripts are to build a library of content, and organize them into "families" of funcitonality.
 
-Installing the Binaries
+Installing the Scripts
 =======================
 
 The scripts are command line based, designed to be used within a batch script or DevOPs tool such as Cher or Ansible.
 Each script is a python3 script, and the complete list of the python modules will be provided to aid people using a pip install.
-
-Installing the Source
-=====================
 
 You will need to use Python 3.6 or higher and the modules listed in the dependency section.  
 
