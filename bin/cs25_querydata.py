@@ -73,16 +73,16 @@ def main():
     else:
         print(json.dumps(SUMOWISDOM, indent=4, sort_keys=True))
 
-def querydata(srcfile):
+
+def build_wisdom(srcfile, querylines):
     """
-    Currently this will look for keywords and show them in order
-    Additionally, it will calculate the frequency of keyword use
+    Structure the ouptut of the data found in the query
+    this data is saved into a pickle file for later use
     """
 
     termlibrary = pandas.read_csv(TERMSFILE, header=None, index_col=0, squeeze=True).to_dict()
 
     sllist = (os.path.basename(srcfile).split('.'))
-
     sls = sllist[1]
     slo = sllist[2]
     slt = sllist[3]
@@ -95,6 +95,19 @@ def querydata(srcfile):
     if not slt in SUMOWISDOM[sls][slo].keys():
         SUMOWISDOM[sls][slo][slt] = dict()
     SUMOWISDOM[sls][slo][slt][sli] = list()
+
+    for queryline in querylines:
+        queryline = (re.sub('[=()"]', ' ', queryline))
+        for word in queryline.split():
+            if word in termlibrary.keys() or word.startswith('_'):
+                SUMOWISDOM[sls][slo][slt][sli].append(word)
+    return SUMOWISDOM
+
+def querydata(srcfile):
+    """
+    Currently this will look for keywords and show them in order
+    Additionally, it will calculate the frequency of keyword use
+    """
 
     srcfileobj = open(srcfile, "r")
     filelines = srcfileobj.readlines()
@@ -122,12 +135,8 @@ def querydata(srcfile):
             if with_delimiting_lines:
                 group.append(line)
     srcfileobj.close()
-    for queryline in querylines:
-        queryline = (re.sub('[=()"]', ' ', queryline))
-        for word in queryline.split():
-            if word in termlibrary.keys() or word.startswith('_'):
-                SUMOWISDOM[sls][slo][slt][sli].append(word)
-    return SUMOWISDOM
+
+    build_wisdom(srcfile, querylines)
 
 if __name__ == '__main__':
     main()
