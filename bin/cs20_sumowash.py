@@ -27,6 +27,7 @@ import os
 import pathlib
 import re
 import sys
+import shutil
 import pandas
 
 sys.dont_write_bytecode = 1
@@ -69,6 +70,19 @@ def main():
         for txtfile in pathlib.Path(os.path.abspath(ARGS.srcdir)).rglob('*.txt'):
             sumowash(txtfile)
 
+def setup_files(srcfile):
+    """
+    Creates the variables for the srcflie and dstfile
+    """
+
+    myfile = pathlib.Path(srcfile)
+    dstname = myfile.with_suffix(".query")
+    basedir = os.path.dirname(os.path.realpath(os.path.basename(srcfile)))
+
+    srcfile = os.path.join(basedir, srcfile)
+    dstfile = os.path.join(basedir, dstname)
+    return srcfile, dstfile
+
 def sumowash(srcfile):
     """
     This rewrites the input file to following standards
@@ -78,12 +92,7 @@ def sumowash(srcfile):
 
     termlibrary = pandas.read_csv(TERMSFILE, header=None, index_col=0, squeeze=True).to_dict()
 
-    myfile = pathlib.Path(srcfile)
-    dstfile = myfile.with_suffix(".query")
-    basedir = os.path.dirname(os.path.realpath(os.path.basename(srcfile)))
-
-    srcfile = os.path.join(basedir, srcfile)
-    dstfile = os.path.join(basedir, dstfile)
+    (srcfile, dstfile) = setup_files(srcfile)
 
     srcfileobj = open(srcfile, "r")
     dstfileobj = open(dstfile, "w")
@@ -131,6 +140,7 @@ def sumowash(srcfile):
         dstfileobj.write(FINAL.format("    Reference:", url_ref + '\n'))
     dstfileobj.write('{}'.format('*/' + '\n'))
     dstfileobj.close()
+    shutil.copyfile(dstfile, dstfile + '.txt')
     os.remove(srcfile)
 
 if __name__ == '__main__':
