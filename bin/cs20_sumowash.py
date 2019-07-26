@@ -73,7 +73,7 @@ def sumowash(srcfile):
     """
     This rewrites the input file to following standards
     For now this appends and regularizes white space.
-    Later it will handle write space and then handle other style
+    Later it will handle write space and then handle other styles
     """
 
     termlibrary = pandas.read_csv(TERMSFILE, header=None, index_col=0, squeeze=True).to_dict()
@@ -108,7 +108,7 @@ def sumowash(srcfile):
             continue
         rem = re.match(r"(_\w+)\s?=\s?(\w+)\s?((\S|\s+)+)?", fileline)
         if rem:
-            fileline = rem.groups()[0] + '=' + '"' + '{{data_source}}' + '"' 
+            fileline = rem.groups()[0] + '=' + '"' + '{{data_source}}' + '"'
             if rem.groups()[2]:
                 fileline = fileline + ' ' + rem.groups()[2]
 

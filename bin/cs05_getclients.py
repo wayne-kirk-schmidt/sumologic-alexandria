@@ -103,7 +103,7 @@ def getclients():
             if ARGS.outputfile:
                 outputobj = open(ARGS.outputfile, "w+")
                 outputobj.write(csvout)
-                outputobj.close
+                outputobj.close()
             else:
                 print(csvout, end='')
         else:

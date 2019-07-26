@@ -76,21 +76,40 @@ def main():
     else:
         with open(cfgfile) as cfgobj:
             for cfgline in cfgobj:
-                orgid, sitename, orgtype, orgname = cfgline.split(',')
+                orgid, sitename = cfgline.split(',')[1:2]
                 baseurl = 'https://%s-monitor.sumologic.net/glass' % sitename
                 jsonurl = '%s/api/json/datastore/searchable/exportjson' % baseurl
                 glassdump(jsonurl, sitename, orgid)
+
+def prepare_output(sitename, orgid, glass_item):
+    """
+    This will construct the output file name
+    """
+    homedir = os.path.abspath((os.environ['HOME']))
+    dumpdir = '%s/Downloads/cscontent/output/%s/%s' % (homedir, sitename, orgid)
+    os.makedirs(dumpdir, exist_ok=True)
+
+    txt_dir = '%s/txt' % dumpdir
+    os.makedirs(txt_dir, exist_ok=True)
+
+    csv_dir = '%s/csv' % dumpdir
+    os.makedirs(csv_dir, exist_ok=True)
+
+    rightnow = datetime.datetime.now()
+    dstamp = rightnow.strftime("%Y%m%d")
+    tstamp = rightnow.strftime("%H%M%S")
+
+    namelist = ['glass', sitename, orgid, glass_item, dstamp, tstamp, 'csv']
+    filename = (".".join(namelist))
+    output_file = os.path.join(csv_dir, filename)
+
+    return output_file
 
 def glassdump(jsonurl, sitename, orgid):
     """
     make a connection to the web interface, pull down information as a JSON payload
     then convert the JSON payload into a CSV using pandas and cleanup/filter data
     """
-
-    homedir = os.path.abspath((os.environ['HOME']))
-    dumpdir = '%s/Downloads/cscontent/output/%s/%s' % (homedir, sitename, orgid)
-
-    os.makedirs(dumpdir, exist_ok=True)
 
     for glass_item in GLASS_LIST:
         glass_query = '%s/%s?orgid=%s' % (jsonurl, glass_item, orgid)
@@ -101,22 +120,13 @@ def glassdump(jsonurl, sitename, orgid):
             jsonlength = len(results.text)
         if results.status_code == 200:
             if jsonlength > 22:
-                txt_dir = '%s/txt' % dumpdir
-                csv_dir = '%s/csv' % dumpdir
-                os.makedirs(txt_dir, exist_ok=True)
-                os.makedirs(csv_dir, exist_ok=True)
                 dataframe = pandas.read_json(results.text)
                 dataframe.to_csv()
                 o_f = dataframe.loc[:, ['query', 'id']]
                 o_f['sitename'] = sitename
                 outcolumns = ['id', 'sitename', 'query']
                 csvout = o_f.to_csv(columns=outcolumns, index=False)
-                rightnow = datetime.datetime.now()
-                dstamp = rightnow.strftime("%Y%m%d")
-                tstamp = rightnow.strftime("%H%M%S")
-                namelist = ['glass', sitename, orgid, glass_item, dstamp, tstamp, 'csv']
-                filename = (".".join(namelist))
-                output_file = os.path.join(csv_dir, filename)
+                output_file = prepare_output(sitename, orgid, glass_item)
                 my_output_obj = open(output_file, 'w')
                 my_output_obj.write(csvout + '\n')
                 my_output_obj.close()
