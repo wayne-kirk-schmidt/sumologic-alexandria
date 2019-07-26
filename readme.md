@@ -42,8 +42,8 @@ Dependencies
 
 See the contents of "pipfile"
 
-Features and Usage
-==================
+Script Names and Purposes
+=========================
 
 Scripts and Functions:
 
@@ -55,7 +55,7 @@ Scripts and Functions:
 
     4. cs20_sumowash.py - normalize the query syntax, and document the query
 
-NOTE: this will also include a critique of the syntax, and offer suggestions for improvement
+NOTE: in the future this will also include a critique of the syntax, and offer suggestions for improvement
 
     5. cs25_querydata.py - query the information for a query or queries for a given orgid or orgids.
 
@@ -100,3 +100,4 @@ Support
 
 Feel free to e-mail me with issues to: wschmidt@sumologic.com
 I will provide "best effort" fixes and extend the scripts.
+/Users/wschmidt/Downloads/sumologictoolbox-master/Pipfile
