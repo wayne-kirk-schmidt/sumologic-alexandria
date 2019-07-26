@@ -76,7 +76,8 @@ def main():
     else:
         with open(cfgfile) as cfgobj:
             for cfgline in cfgobj:
-                orgid, sitename = cfgline.split(',')[1:2]
+                orgid = cfgline.split(',')[0]
+                sitename = cfgline.split(',')[1]
                 baseurl = 'https://%s-monitor.sumologic.net/glass' % sitename
                 jsonurl = '%s/api/json/datastore/searchable/exportjson' % baseurl
                 glassdump(jsonurl, sitename, orgid)
