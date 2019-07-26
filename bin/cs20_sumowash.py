@@ -115,16 +115,17 @@ def sumowash(srcfile):
             continue
         if fileline.isspace():
             continue
-        rem = re.match(r"(_\w+)\s?=\s?(\w+)\s?((\S|\s+)+)?", fileline)
+
+        rem = re.match(r"(_\w+)\s?=\s?([\w|\S|\/]+)\s?((\S|\s+)+)?", fileline)
         if rem:
             fileline = rem.groups()[0] + '=' + '"' + '{{data_source}}' + '"'
             if rem.groups()[2]:
                 fileline = fileline + ' ' + rem.groups()[2]
 
-        split_string = fileline.split('//')
-        if len(split_string) > 1:
-            dstfileobj.write('//' + split_string[1] + '\n')
-            dstfileobj.write(split_string[0] + '\n')
+        com = re.match(r"(.*?)\s?[^:]\/\/\s?([\S|\s]+)?", fileline)
+        if com:
+            dstfileobj.write('//' + ' ' + com.groups()[1] + '\n')
+            dstfileobj.write(com.groups()[0] + '\n')
         else:
             dstfileobj.write(fileline + '\n')
 
