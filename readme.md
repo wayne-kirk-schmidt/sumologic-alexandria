@@ -4,12 +4,6 @@ SumoLogic Library
 SumoLogic is a suite of tools to query, extract, organize, and query against SumoLogic content.
 The goal of the scripts are to build a library of content, and organize them into "families" of functionality.
 
-Famous Libraries
-================
-
-[Famous Libraries of the World](http://www.mastersinlibraryscience.net/25-most-famous-libraries-of-the-world/)
-
-
 Installing the Scripts
 =======================
 
@@ -108,3 +102,9 @@ Support
 Feel free to e-mail me with issues to: wschmidt@sumologic.com
 I will provide "best effort" fixes and extend the scripts.
 /Users/wschmidt/Downloads/sumologictoolbox-master/Pipfile
+
+Famous Libraries
+================
+
+[Famous Libraries of the World](http://www.mastersinlibraryscience.net/25-most-famous-libraries-of-the-world/)
+
