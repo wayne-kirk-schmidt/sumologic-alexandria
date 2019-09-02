@@ -2,7 +2,7 @@ SumoLogic Toshokan
 ==================
 
 SumoLogic is a suite of tools to query, extract, organize, and query against SumoLogic content.
-The goal of the scripts are to build a library of content, and organize them into "families" of funcitonality.
+The goal of the scripts are to build a library of content, and organize them into "families" of functionality.
 
 Installing the Scripts
 =======================
