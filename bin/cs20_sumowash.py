@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Explanation: cleanup existing query files
+Explanation: Perform initial cleanup of Sumo Logic client query syntax
 
 Usage:
-   $ python  sumowash [ options ]
+   $ python  cs20_sumowash.py [ options ]
 
 Style:
    Google Python Style Guide:

@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Explanation: collect useful information from the files that have been cleaned up.
+Explanation: Assemble information on Sumo Logic sanitized client queries
 
 Usage:
-   $ python  querydata [ options ]
+   $ python cs25_querydata.py [ options ]
 
 Style:
    Google Python Style Guide:

@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Explanation: dumps a glass file for a specific file into a csv file
+Explanation: Dumper for Sumo Logic GLASS rdscq maps supporting multiple workers
 
 Usage:
-    $ python  glassdump [ options ]
+    $ python  cs10_glassdump.py [ options ]
 
 Style:
     Google Python Style Guide:
@@ -26,23 +26,25 @@ import argparse
 import datetime
 import os
 import sys
+from threading import Thread
+import queue
 import requests
 import pandas
 
 sys.dont_write_bytecode = 1
 PARSER = argparse.ArgumentParser(description="""
 
-This pulls down a specific glass file for a given client and location
+This will pull down the appropriate data for all specified site and orgids
 
 """)
 
-PARSER.add_argument('-u', metavar='<user>', dest='username', help='set username')
-PARSER.add_argument('-p', metavar='<pass>', dest='password', help='set password')
-PARSER.add_argument('-l', metavar='<site>', dest='sitename', help='set glass site')
-PARSER.add_argument('-c', metavar='<cfgfile>', dest='cfgfile', help='provide config')
-PARSER.add_argument('-i', metavar='<id>', dest='orgid', help='set orgid')
-PARSER.add_argument('-d', metavar='<dir>', dest='destdir', help='set output dir')
-PARSER.add_argument('-g', metavar='<glass>', dest='glassitem', help='specify glass item to get')
+PARSER.add_argument('-l', metavar='<site>', dest='sitename', help='specify  glass site')
+PARSER.add_argument('-i', metavar='<orgid>', dest='orgid', help='specify orgid')
+PARSER.add_argument('-c', metavar='<config>', dest='config', help='specify  config')
+PARSER.add_argument('-u', metavar='<user>', dest='username', help='specify  username')
+PARSER.add_argument('-p', metavar='<pass>', dest='password', help='specify  password')
+PARSER.add_argument('-d', metavar='<dir>', dest='destdir', help='specify output dir')
+PARSER.add_argument('-w', metavar='<workers>', dest='workers', help='specify workers')
 
 ARGS = PARSER.parse_args()
 
@@ -50,6 +52,15 @@ if ARGS.username:
     os.environ["GLASSUSER"] = ARGS.username
 if ARGS.password:
     os.environ["GLASSPASS"] = ARGS.password
+
+WORKERS = 1
+if ARGS.workers:
+    WORKERS = int(ARGS.workers)
+
+DESTDIR = "/tmp"
+
+if ARGS.destdir:
+    DESTDIR = os.path.abspath((ARGS.destdir))
 
 try:
     GLASSPASS = os.environ['GLASSPASS']
@@ -59,6 +70,12 @@ except KeyError as myerror:
 
 GLASS_DICT = {'rdscq' : 'query'}
 GLASS_LIST = list(GLASS_DICT.keys())
+GLASS_ORGS = []
+GLASSQUEUE = queue.Queue()
+
+RIGHTNOW = datetime.datetime.now()
+DSTAMP = RIGHTNOW.strftime("%Y%m%d")
+TSTAMP = RIGHTNOW.strftime("%H%M%S")
 
 def main():
     """
@@ -67,27 +84,59 @@ def main():
     """
     sitename = ARGS.sitename
     orgid = ARGS.orgid
-    cfgfile = ARGS.cfgfile
+    config = ARGS.config
 
-    if not cfgfile:
+    if not config:
         baseurl = 'https://%s-monitor.sumologic.net/glass' % sitename
         jsonurl = '%s/api/json/datastore/searchable/exportjson' % baseurl
-        glassdump(jsonurl, sitename, orgid)
+        glassprep(jsonurl, sitename, orgid)
     else:
-        with open(cfgfile) as cfgobj:
+        with open(config) as cfgobj:
             for cfgline in cfgobj:
                 orgid = cfgline.split(',')[0]
                 sitename = cfgline.split(',')[1]
                 baseurl = 'https://%s-monitor.sumologic.net/glass' % sitename
                 jsonurl = '%s/api/json/datastore/searchable/exportjson' % baseurl
-                glassdump(jsonurl, sitename, orgid)
+                glassprep(jsonurl, sitename, orgid)
 
-def prepare_output(sitename, orgid, glass_item):
+    for _i in range(WORKERS):
+        glassthread = Thread(target=glassworker)
+        glassthread.daemon = True
+        glassthread.start()
+
+    GLASSQUEUE.join()
+
+def glassprep(jsonurl, sitename, orgid):
     """
-    This will construct the output file name
+    This packs a data structure we will put onto a queue for processing
+    The design is enqueue serially, and dequeue in parallel
     """
-    homedir = os.path.abspath((os.environ['HOME']))
-    dumpdir = '%s/Downloads/cscontent/output/%s/%s' % (homedir, sitename, orgid)
+
+    for glass_item in GLASS_LIST:
+        glass_query = '%s/%s?orgid=%s' % (jsonurl, glass_item, orgid)
+        glass_items = '%s#%s#%s#%s' % (sitename, orgid, glass_item, glass_query)
+        GLASSQUEUE.put(glass_items)
+
+def glassworker():
+    """
+    A wrapper for the collectdata subroutine. Each of the workers defined will run this code
+    """
+    while True:
+        target_item = GLASSQUEUE.get()
+        collectdata(target_item)
+        GLASSQUEUE.task_done()
+
+def createdirs(sitename, orgid):
+    """
+    This will create the directories required for the glass dump.
+    each directory will have files in each subdirectory of the dump directory.
+
+    csv - raw glass output
+    txt - extracted files from the csv files
+    slq - normalized data
+    """
+
+    dumpdir = '%s/cscontent/output/%s/%s' % (DESTDIR, sitename, orgid)
     os.makedirs(dumpdir, exist_ok=True)
 
     txt_dir = '%s/txt' % dumpdir
@@ -96,45 +145,45 @@ def prepare_output(sitename, orgid, glass_item):
     csv_dir = '%s/csv' % dumpdir
     os.makedirs(csv_dir, exist_ok=True)
 
-    rightnow = datetime.datetime.now()
-    dstamp = rightnow.strftime("%Y%m%d")
-    tstamp = rightnow.strftime("%H%M%S")
+    slq_dir = '%s/slq' % dumpdir
+    os.makedirs(slq_dir, exist_ok=True)
 
-    namelist = ['glass', sitename, orgid, glass_item, dstamp, tstamp, 'csv']
+    return csv_dir
+
+def collectdata(target_item):
+    """
+    This collects the data and writes out to the output file.
+    It will call createdirs as a byproduct of the collectioin.
+    """
+
+    (sitename, orgid, glass_item, glass_query) = target_item.split('#')
+
+    namelist = ['glass', sitename, orgid, glass_item, DSTAMP, TSTAMP, 'csv']
     filename = (".".join(namelist))
-    output_file = os.path.join(csv_dir, filename)
 
-    return output_file
+    output_file = os.path.join(createdirs(sitename, orgid), filename)
 
-def glassdump(jsonurl, sitename, orgid):
-    """
-    make a connection to the web interface, pull down information as a JSON payload
-    then convert the JSON payload into a CSV using pandas and cleanup/filter data
-    """
-
-    for glass_item in GLASS_LIST:
-        glass_query = '%s/%s?orgid=%s' % (jsonurl, glass_item, orgid)
-        results = requests.get(glass_query, auth=(GLASSUSER, GLASSPASS))
-        if 'content-length' in results.headers:
-            jsonlength = int(results.headers['content-length'])
+    results = requests.get(glass_query, auth=(GLASSUSER, GLASSPASS))
+    if 'content-length' in results.headers:
+        jsonlength = int(results.headers['content-length'])
+    else:
+        jsonlength = len(results.text)
+    if results.status_code == 200:
+        if jsonlength > 22:
+            dataframe = pandas.read_json(results.text)
+            dataframe.to_csv()
+            o_f = dataframe.loc[:, ['query', 'id']]
+            o_f['sitename'] = sitename
+            outcolumns = ['id', 'sitename', 'query']
+            csvout = o_f.to_csv(columns=outcolumns, index=False)
         else:
-            jsonlength = len(results.text)
-        if results.status_code == 200:
-            if jsonlength > 22:
-                dataframe = pandas.read_json(results.text)
-                dataframe.to_csv()
-                o_f = dataframe.loc[:, ['query', 'id']]
-                o_f['sitename'] = sitename
-                outcolumns = ['id', 'sitename', 'query']
-                csvout = o_f.to_csv(columns=outcolumns, index=False)
-                output_file = prepare_output(sitename, orgid, glass_item)
-                my_output_obj = open(output_file, 'w')
-                my_output_obj.write(csvout + '\n')
-                my_output_obj.close()
-            else:
-                print('Site: {} OrgId: {} Small_Payload: {}'.format(sitename, orgid, jsonlength))
-        else:
-            print("Error occured")
+            csvout = 'site: %s orgid: %s SmallPayload: %s'  % (sitename, orgid, jsonlength)
+    else:
+        csvout = 'site: %s orgid: %s ErrorOccured: %s'  % (sitename, orgid, results.status_code)
+
+    my_output_obj = open(output_file, 'w')
+    my_output_obj.write(csvout + '\n')
+    my_output_obj.close()
 
 if __name__ == '__main__':
     main()

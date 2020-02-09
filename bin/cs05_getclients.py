@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Explanation: dumps the client list from glass for a specific region iinto a CSV format
+Explanation: Dumps the Sumo Logic GLASS client list for a given region into a CSV file
 
 Usage:
-    $ python  getclients [ options ]
+    $ python cs05_getclients.py [ options ]
 
 Style:
     Google Python Style Guide:

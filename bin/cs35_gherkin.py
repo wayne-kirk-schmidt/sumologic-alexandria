@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Explanation: explore pickled python data
+Explanation: Explore pickled Sumo Logic client query data
 
 Usage:
-   $ python  gherkin [ options ]
+   $ python cs35_gherkin.py [ options ]
 
 Style:
    Google Python Style Guide:

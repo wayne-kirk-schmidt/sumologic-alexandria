@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Explanation: dumps out query files from a central csv file
+Explanation: Extracts specific Sumo Logic client queries from a CSV dump file
 
 Usage:
-   $ python  querydump [ options ]
+   $ python  cs15_querydump.py [ options ]
 
 Style:
    Google Python Style Guide:

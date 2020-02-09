@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Explanation: load up pickled python data for basic analysis
+Explanation: Load Sumo Logic client queries stored by pickle
 
 Usage:
-   $ python  unpickle [ options ]
+   $ python cs30_unpickle.py [ options ]
 
 Style:
    Google Python Style Guide:
