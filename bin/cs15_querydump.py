@@ -12,14 +12,14 @@ Style:
    http://google.github.io/styleguide/pyguide.html
 
     @name           querydump
-    @version        0.4.00
+    @version        0.9.0
     @author-name    Wayne Schmidt
     @author-email   wschmidt@sumologic.com
     @license-name   GNU GPL
     @license-url    http://www.gnu.org/licenses/gpl.html
 """
 
-__version__ = 0.40
+__version__ = 0.90
 __author__ = "Wayne Schmidt (wschmidt@sumologic.com)"
 
 import argparse
@@ -32,8 +32,7 @@ sys.dont_write_bytecode = 1
 
 PARSER = argparse.ArgumentParser(description="""
 
-This script will cleanup syntax as much as possible for an input file.
-It will collect information on the type and number of commands used.
+This will extract Sumo Logic queries from a single dump file
 
 """)
 
@@ -61,22 +60,22 @@ def querydump(glassfile):
     """
 
     srcdir = os.path.abspath(os.path.dirname(os.path.realpath(glassfile)))
-    topdir = os.path.dirname(srcdir)
-    dstdir = os.path.join(topdir, 'txt')
-    srcfile = glassfile
-    myfile = str(os.path.splitext(os.path.basename(glassfile))[0])
+    srcfile = os.path.realpath(glassfile)
+
+    dstdir = srcdir.replace("/csv", "/txt")
+    dstname = os.path.basename(os.path.realpath(glassfile))
 
     if not os.path.exists(dstdir):
-        print(dstdir)
         os.mkdir(dstdir)
 
     csv_data = pandas.read_csv(srcfile)
 
     datalist = csv_data.loc[:, ARGS.query]
     for index, rowvalue in datalist.iteritems():
-        targetfile = myfile + "." + str(index) + ".txt"
-        dstfile = os.path.join(dstdir, targetfile)
-        fileobj = open(dstfile, "w")
+        listindex = "." + str(index) + ".txt"
+        dstfile = dstname.replace(".csv", listindex)
+        targetfile = os.path.join(dstdir, dstfile)
+        fileobj = open(targetfile, "w")
         fileobj.write(rowvalue)
         fileobj.write('\n')
         fileobj.close()
