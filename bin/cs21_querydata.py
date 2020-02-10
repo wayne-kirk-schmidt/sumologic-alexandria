@@ -83,10 +83,18 @@ def build_wisdom(srcfile, querylines):
     termlibrary = pandas.read_csv(TERMSFILE, header=None, index_col=0, squeeze=True).to_dict()
 
     sllist = (os.path.basename(srcfile).split('.'))
-    sls = sllist[1]
-    slo = sllist[2]
-    slt = sllist[3]
-    sli = int(sllist[6])
+
+    ### sls - Sumo Logic Site
+    sls = sllist[0]
+
+    ### slo - Sumo Logic Organization
+    slo = sllist[1]
+
+    ### slo - Sumo Logic Query Type
+    slt = sllist[2]
+
+    ### slo - Sumo Logic Query Index
+    sli = int(sllist[4])
 
     if not sls in SUMOWISDOM.keys():
         SUMOWISDOM[sls] = dict()
