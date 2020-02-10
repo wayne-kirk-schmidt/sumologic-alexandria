@@ -47,23 +47,21 @@ Script Names and Purposes
 
 Scripts and Functions:
 
-    1. cs05_getclients.py - collect a list of organizational id or ids.
+    1. cs11_getclients.py 	- get a list of organizational ids from a given deployment site
 
-    2. cs10_glassdump.py - using the collector id or ids, download the rdsqs for that orgid.
+    2. cs12_glassdump.py 	- dump all of the consolidated queries from a given organizational id and site
 
-    3. cs15_querydump.py - extract out each query from the downloaded master file
+    3. cs13_extractquery.py 	- split all queries into specific files, and perform basic hygiene on them
 
-    4. cs20_sumowash.py - normalize the query syntax, and document the query
+NOTE: in the future we will extend to include other scripts/modules to critique syntax, and offer improvement suggestions
 
-NOTE: in the future this will also include a critique of the syntax, and offer suggestions for improvement
-
-    5. cs25_querydata.py - query the information for a query or queries for a given orgid or orgids.
+    4. cs21_querydata.py	- query the information for a query or queries for a given orgid or orgids.
 
 NOTE: this can store the information into a pickle file for later use.
 
-    6. cs30_unpickle.py - this provides a summary of queries information and will be combined into a single script.
+    5. cs22_unpickle.py		- this provides a summary of queries information and will be combined into a single script.
 
-    7. cs35_gherkin.py - this provides a fingerprint of queries and will be combined into a single script.
+    6. cs23_gherkin.py		- this provides a fingerprint of queries and will be combined into a single script.
         
 To Do List:
 ===========
