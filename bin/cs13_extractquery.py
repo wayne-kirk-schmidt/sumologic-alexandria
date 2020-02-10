@@ -51,7 +51,7 @@ RIGHTNOW = datetime.datetime.now()
 DSTAMP = RIGHTNOW.strftime("%Y%m%d")
 TSTAMP = RIGHTNOW.strftime("%H%M%S")
 
-QUERYNAME = 'SumoLogic Generated Query'
+QUERYNAME = 'Sumo Logic Generated Query'
 QUERYREPO = 'https://github.com/sumologic-library/generated-queries/'
 QUERYAUTH = 'querylibrarian@sumologic.com'
 SCRIPTDIR = os.path.dirname(os.path.abspath(__file__))

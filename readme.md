@@ -1,7 +1,7 @@
-SumoLogic Library
-=================
+Sumo Logic Library
+====-=============
 
-SumoLogic is a suite of tools to query, extract, organize, and query against SumoLogic content.
+Sumo Logic is a suite of tools to query, extract, organize, and query against Sumo Logic content.
 The goal of the scripts are to build a library of content, and organize them into "families" of functionality.
 
 Installing the Scripts
