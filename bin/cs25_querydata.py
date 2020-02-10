@@ -42,8 +42,8 @@ It will collect information on the type and number of commands used.
 """)
 
 PARSER.add_argument('-f', metavar='<srcfile>', dest='srcfile', help='file to cleanup')
-PARSER.add_argument('-d', metavar='<srcdir>', dest='srcdir', help='directory to cleanup')
-PARSER.add_argument('-p', metavar='<picklefile>', dest='picklefile', help='store our data')
+PARSER.add_argument('-d', metavar='<srcdir>', dest='srcdir', help='specify target directory')
+PARSER.add_argument('-p', metavar='<picklefile>', dest='picklefile', help='specify data storage')
 
 ARGS = PARSER.parse_args()
 
@@ -65,7 +65,7 @@ def main():
         querydata(txtfile)
 
     if ARGS.srcdir:
-        for txtfile in pathlib.Path(os.path.abspath(ARGS.srcdir)).rglob('*.query'):
+        for txtfile in pathlib.Path(os.path.abspath(ARGS.srcdir)).rglob('*.slq'):
             querydata(txtfile)
 
     if PICKLEFILE:

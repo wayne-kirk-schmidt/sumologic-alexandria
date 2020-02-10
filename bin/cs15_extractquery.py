@@ -25,7 +25,10 @@ __author__ = "Wayne Schmidt (wschmidt@sumologic.com)"
 import argparse
 import os
 import sys
+from threading import Thread
+import queue
 import pathlib
+import datetime
 import pandas
 
 sys.dont_write_bytecode = 1
@@ -36,11 +39,22 @@ This will extract Sumo Logic queries from a single dump file
 
 """)
 
-PARSER.add_argument('-f', metavar='<srcfile>', dest='srcfile', help='input file to cleanup')
-PARSER.add_argument('-d', metavar='<srcdir>', dest='srcdir', help='input directory to cleanup')
-PARSER.add_argument('-q', metavar='<query>', dest='query', default='query', help='tag to use')
+PARSER.add_argument('-f', metavar='<srcfile>', dest='srcfile', help='specify file to cleanup')
+PARSER.add_argument('-d', metavar='<srcdir>', dest='srcdir', help='specify directory to cleanup')
+PARSER.add_argument('-q', metavar='<query>', dest='query', default='query', help='specify tag')
+PARSER.add_argument('-w', metavar='<workers>', dest='workers', help='specify workers')
 
 ARGS = PARSER.parse_args()
+
+WORKERS = 32
+if ARGS.workers:
+    WORKERS = int(ARGS.workers)
+
+WORKERQUEUE = queue.Queue()
+
+RIGHTNOW = datetime.datetime.now()
+DSTAMP = RIGHTNOW.strftime("%Y%m%d")
+TSTAMP = RIGHTNOW.strftime("%H%M%S")
 
 def main():
     """
@@ -48,10 +62,27 @@ def main():
     """
     if ARGS.srcfile:
         csvfile = ARGS.srcfile
-        extractquery(csvfile)
+        WORKERQUEUE.put(csvfile)
+
     if ARGS.srcdir:
         for csvfile in pathlib.Path(ARGS.srcdir).rglob('*.csv'):
-            extractquery(csvfile)
+            WORKERQUEUE.put(csvfile)
+
+    for _i in range(WORKERS):
+        glassthread = Thread(target=glassworker)
+        glassthread.daemon = True
+        glassthread.start()
+
+    WORKERQUEUE.join()
+
+def glassworker():
+    """
+    A wrapper for the collectdata subroutine. Each of the workers defined will run this code
+    """
+    while True:
+        target_item = WORKERQUEUE.get()
+        extractquery(target_item)
+        WORKERQUEUE.task_done()
 
 def extractquery(glassfile):
     """
@@ -79,6 +110,7 @@ def extractquery(glassfile):
         fileobj.write(rowvalue)
         fileobj.write('\n')
         fileobj.close()
+        ### sumowash
 
 if __name__ == '__main__':
     main()
