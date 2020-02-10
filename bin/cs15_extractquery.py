@@ -5,13 +5,13 @@
 Explanation: Extracts specific Sumo Logic client queries from a CSV dump file
 
 Usage:
-   $ python  cs15_querydump.py [ options ]
+   $ python  cs15_extractquery.py [ options ]
 
 Style:
    Google Python Style Guide:
    http://google.github.io/styleguide/pyguide.html
 
-    @name           querydump
+    @name           extractquery
     @version        0.9.0
     @author-name    Wayne Schmidt
     @author-email   wschmidt@sumologic.com
@@ -48,12 +48,12 @@ def main():
     """
     if ARGS.srcfile:
         csvfile = ARGS.srcfile
-        querydump(csvfile)
+        extractquery(csvfile)
     if ARGS.srcdir:
         for csvfile in pathlib.Path(ARGS.srcdir).rglob('*.csv'):
-            querydump(csvfile)
+            extractquery(csvfile)
 
-def querydump(glassfile):
+def extractquery(glassfile):
     """
     This will take the specific file, then run the extraction method.
     Using pandas, this extracts the relevant query out of the CSV file.

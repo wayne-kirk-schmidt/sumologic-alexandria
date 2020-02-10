@@ -71,7 +71,7 @@ except KeyError as myerror:
 GLASS_DICT = {'rdscq' : 'query'}
 GLASS_LIST = list(GLASS_DICT.keys())
 GLASS_ORGS = []
-GLASSQUEUE = queue.Queue()
+WORKERQUEUE = queue.Queue()
 
 RIGHTNOW = datetime.datetime.now()
 DSTAMP = RIGHTNOW.strftime("%Y%m%d")
@@ -104,7 +104,7 @@ def main():
         glassthread.daemon = True
         glassthread.start()
 
-    GLASSQUEUE.join()
+    WORKERQUEUE.join()
 
 def glassprep(jsonurl, sitename, orgid):
     """
@@ -115,16 +115,16 @@ def glassprep(jsonurl, sitename, orgid):
     for glass_item in GLASS_LIST:
         glass_query = '%s/%s?orgid=%s' % (jsonurl, glass_item, orgid)
         glass_items = '%s#%s#%s#%s' % (sitename, orgid, glass_item, glass_query)
-        GLASSQUEUE.put(glass_items)
+        WORKERQUEUE.put(glass_items)
 
 def glassworker():
     """
     A wrapper for the collectdata subroutine. Each of the workers defined will run this code
     """
     while True:
-        target_item = GLASSQUEUE.get()
+        target_item = WORKERQUEUE.get()
         collectdata(target_item)
-        GLASSQUEUE.task_done()
+        WORKERQUEUE.task_done()
 
 def createdirs(sitename, orgid):
     """
