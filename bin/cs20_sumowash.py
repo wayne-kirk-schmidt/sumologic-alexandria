@@ -55,7 +55,7 @@ REFETCDIR = os.path.abspath(SCRIPTDIR.replace('bin', 'etc'))
 TERMSFILE = os.path.join(REFETCDIR, 'operators.csv')
 TERMSDICT = pandas.read_csv(TERMSFILE, header=None, index_col=0, squeeze=True).to_dict()
 
-WORKERS = 1
+WORKERS = 32
 if ARGS.workers:
     WORKERS = int(ARGS.workers)
 

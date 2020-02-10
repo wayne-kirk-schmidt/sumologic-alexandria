@@ -53,7 +53,7 @@ if ARGS.username:
 if ARGS.password:
     os.environ["GLASSPASS"] = ARGS.password
 
-WORKERS = 1
+WORKERS = 32
 if ARGS.workers:
     WORKERS = int(ARGS.workers)
 
