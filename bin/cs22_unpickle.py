@@ -5,7 +5,7 @@
 Explanation: Load Sumo Logic client queries stored by pickle
 
 Usage:
-   $ python cs30_unpickle.py [ options ]
+   $ python cs22_unpickle.py [ options ]
 
 Style:
    Google Python Style Guide:

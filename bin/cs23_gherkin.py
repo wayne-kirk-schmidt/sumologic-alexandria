@@ -5,7 +5,7 @@
 Explanation: Explore pickled Sumo Logic client query data
 
 Usage:
-   $ python cs35_gherkin.py [ options ]
+   $ python cs23_gherkin.py [ options ]
 
 Style:
    Google Python Style Guide:

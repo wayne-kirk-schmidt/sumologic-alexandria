@@ -5,7 +5,7 @@
 Explanation: Assemble information on Sumo Logic sanitized client queries
 
 Usage:
-   $ python cs25_querydata.py [ options ]
+   $ python cs21_querydata.py [ options ]
 
 Style:
    Google Python Style Guide:
