@@ -5,7 +5,7 @@
 Explanation: Dumps the Sumo Logic GLASS client list for a given region into a CSV file
 
 Usage:
-    $ python cs05_getclients.py [ options ]
+    $ python cs11_getclients.py [ options ]
 
 Style:
     Google Python Style Guide:

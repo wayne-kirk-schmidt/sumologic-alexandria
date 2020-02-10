@@ -5,7 +5,7 @@
 Explanation: Dumper for Sumo Logic GLASS rdscq maps supporting multiple workers
 
 Usage:
-    $ python  cs10_glassdump.py [ options ]
+    $ python  cs12_glassdump.py [ options ]
 
 Style:
     Google Python Style Guide:
