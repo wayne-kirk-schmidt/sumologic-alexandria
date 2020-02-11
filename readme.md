@@ -29,11 +29,11 @@ Please follow the following steps to install:
  
     5. Clone this repo using the following command:
     
-        git clone git@github.com:wks-sumo-logic/sumologic-toshokan.git
+        git clone git@github.com:wks-sumo-logic/sumologic-alexandria.git
 
-    This will create a new folder sumologic-toshokan
+    This will create a new folder sumologic-alexandria
     
-    6. Change into the sumologic-toshokan folder. Type the following to install all the package dependencies 
+    6. Change into the sumologic-alexandria folder. Type the following to install all the package dependencies 
        (this may take a while as this will download all of the libraries that sumotoolbox uses):
 
         pipenv install
