@@ -2,18 +2,18 @@
 Alexandria - The Sumo Logic Query Library
 =========================================
 
-Sumo Logic is a suite of tools to query, extract, organize, and query against Sumo Logic content.
-The goal of the scripts are to build a library of content, and organize them into "families" of functionality.
+Alexandria is a suite of tools to query, extract, organize, and query against Sumo Logic content.
+The goal of the scripts are to build a library of content, and organize  them into "families" of functionality.
 
 Installing the Scripts
 =======================
 
-The scripts are command line based, designed to be used within a batch script or DevOPs tool such as Cher or Ansible.
-Each script is a python3 script, and the complete list of the python modules will be provided to aid people using a pip install.
+The scripts are command line based, designed to be used within a batch script or DevOPs tool such as Chef or Ansible.
+Written in python3, all scripts are listed below, and there is a Pipfile to show what modules are required to run.
 
 You will need to use Python 3.6 or higher and the modules listed in the dependency section.  
 
-The steps are as follows: 
+Please follow the following steps to install:
 
     1. Download and install python 3.6 or higher from python.org. Append python3 to the LIB and PATH env.
 
