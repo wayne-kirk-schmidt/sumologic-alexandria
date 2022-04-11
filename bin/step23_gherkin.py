@@ -15,8 +15,8 @@ Style:
     @version        0.4.00
     @author-name    Wayne Schmidt
     @author-email   wschmidt@sumologic.com
-    @license-name   GNU GPL
-    @license-url    http://www.gnu.org/licenses/gpl.html
+    @license-name   APACHE 2.0
+    @license-url    http://www.apache.org/licenses/LICENSE-2.0
 """
 
 __version__ = 0.40
@@ -64,20 +64,19 @@ def gherkin(srcfile):
     ototal = 0
     qtotal = 0
 
-    srcfileobj = open(srcfile, 'rb')
-    sumowisdom = pickle.load(srcfileobj)
-    for key1 in sumowisdom.keys():
-        for key2 in sumowisdom[key1].keys():
-            ototal = ototal + 1
-            for key3 in sumowisdom[key1][key2].keys():
-                for key4 in sumowisdom[key1][key2][key3].keys():
-                    qtotal = qtotal + 1
-                    wordcount = len(sumowisdom[key1][key2][key3][key4])
-                    fingerprint = sumowisdom[key1][key2][key3][key4]
-                    print('{} {} {} {} {}'.format(key1, key2, key3, key4, wordcount))
-                    print('{} {} {} {} {}'.format(key1, key2, key3, key4, fingerprint))
-                    wtotal = wtotal + wordcount
-    srcfileobj.close()
+    with open(srcfile, 'rb') as srcfileobj:
+        sumowisdom = pickle.load(srcfileobj)
+        for key1 in sumowisdom.keys():
+            for key2 in sumowisdom[key1].keys():
+                ototal = ototal + 1
+                for key3 in sumowisdom[key1][key2].keys():
+                    for key4 in sumowisdom[key1][key2][key3].keys():
+                        qtotal = qtotal + 1
+                        wordcount = len(sumowisdom[key1][key2][key3][key4])
+                        fingerprint = sumowisdom[key1][key2][key3][key4]
+                        print('{} {} {} {} {}'.format(key1, key2, key3, key4, wordcount))
+                        print('{} {} {} {} {}'.format(key1, key2, key3, key4, fingerprint))
+                        wtotal = wtotal + wordcount
 
 if __name__ == '__main__':
     main()

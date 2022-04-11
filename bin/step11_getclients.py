@@ -15,8 +15,8 @@ Style:
     @version        0.4.00
     @author-name    Wayne Schmidt
     @author-email   wschmidt@sumologic.com
-    @license-name   GNU GPL
-    @license-url    http://www.gnu.org/licenses/gpl.html
+    @license-name   APACHE 2.0
+    @license-url    http://www.apache.org/licenses/LICENSE-2.0
 """
 
 __version__ = 0.40
@@ -101,9 +101,8 @@ def getclients():
             outcolumns = ['id', 'sitename', 'accountType', 'displayName']
             csvout = g_f.to_csv(columns=outcolumns, index=False, header=False)
             if ARGS.outputfile:
-                outputobj = open(ARGS.outputfile, "w+")
-                outputobj.write(csvout)
-                outputobj.close()
+                with open(ARGS.outputfile, "w+") as outputobj:
+                    outputobj.write(csvout)
             else:
                 print(csvout, end='')
         else:

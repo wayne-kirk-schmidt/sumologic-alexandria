@@ -27,14 +27,10 @@ Please follow the following steps to install:
     
         sudo -H pip3 install pipenv 
  
-    5. Clone this repo using the following command:
-    
-        git clone git@github.com:wks-sumo-logic/sumologic-alexandria.git
+    5. Clone this repository. This will create a new folder
 
-    This will create a new folder sumologic-alexandria
-    
-    6. Change into the sumologic-alexandria folder. Type the following to install all the package dependencies 
-       (this may take a while as this will download all of the libraries that sumotoolbox uses):
+    6. Change into the new folder. Type the following to install all the package dependencies 
+       (this may take a while as this will download all of the libraries required):
 
         pipenv install
         
@@ -48,46 +44,42 @@ Script Names and Purposes
 
 Scripts and Functions:
 
-    1. cs11_getclients.py - get a list of organizational ids from a given deployment site
+    1. step11_getclients.py - get a list of organizational ids from a given deployment site
 
-    2. cs12_glassdump.py - dump all consolidated queries for a given organizational id and site
+    2. step12_glassdump.py - dump all consolidated queries for a given organizational id and site
 
-    3. cs13_extractquery.py - split queries into specific files and perform basic hygiene
+    3. step13_extractquery.py - split queries into specific files and perform basic hygiene
 
 NOTE: in the future we will have scripts/modules to critique syntax, and offer improvement suggestions
 
-    4. cs21_querydata.py - query the information for a query or queries for a given orgid or orgids.
+    4. step21_querydata.py - query the information for a query or queries for a given orgid or orgids.
 
 NOTE: this can store the information into a pickle file for later use.
 
-    5. cs22_unpickle.py	- this provides a summary of query information
+    5. step22_unpickle.py	- this provides a summary of query information
 
-    6. cs23_gherkin.py - this provides a fingerprint of all queries
+    6. step23_gherkin.py - this provides a fingerprint of all queries
         
 To Do List:
 ===========
 
 * Extend the pickle file information for the content
 
-* Build an Ansible wrapper for the scripts
-
-* Add depdndency checking for pip modules
-
-* Fix remaining pylint issues/points
-
 * add wrapper for exporting queries into a HTML tree and other components
 
 License
 =======
 
-Copyright 2019 Wayne Kirk Schmidt
+Copyright 2020 Wayne Kirk Schmidt
+https://www.linkedin.com/in/waynekirkschmidt
 
-Licensed under the GNU GPL License (the "License");
-you may not use this file except in compliance with the License.
+Licensed under the Apache 2.0 License (the "License");
+
+You may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    license-name   GNU GPL
-    license-url    http://www.gnu.org/licenses/gpl.html
+    license-name   APACHE 2.0
+    license-url    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -98,7 +90,12 @@ limitations under the License.
 Support
 =======
 
-Feel free to e-mail me with issues to: wschmidt@sumologic.com
+Feel free to e-mail me with issues to: 
+
+*   wschmidt@sumologic.com
+
+*   wayne.kirk.schmidt@gmail.com
+
 I will provide "best effort" fixes and extend the scripts.
 /Users/wschmidt/Downloads/sumologictoolbox-master/Pipfile
 

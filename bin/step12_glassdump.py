@@ -15,8 +15,8 @@ Style:
     @version        0.4.00
     @author-name    Wayne Schmidt
     @author-email   wschmidt@sumologic.com
-    @license-name   GNU GPL
-    @license-url    http://www.gnu.org/licenses/gpl.html
+    @license-name   APACHE 2.0
+    @license-url    http://www.apache.org/licenses/LICENSE-2.0
 """
 
 __version__ = 0.40
@@ -177,19 +177,16 @@ def collectdata(target_item):
             o_f['sitename'] = sitename
             outcolumns = ['id', 'sitename', 'query']
             csvout = o_f.to_csv(columns=outcolumns, index=False)
-            my_output_obj = open(output_file, 'w')
-            my_output_obj.write(csvout + '\n')
-            my_output_obj.close()
+            with open(output_file, 'w') as my_output_obj:
+                my_output_obj.write(csvout + '\n')
         else:
             csvout = 'site: %s orgid: %s SmallPayload: %s'  % (sitename, orgid, jsonlength)
-            my_output_obj = open(errors_file, 'w')
-            my_output_obj.write(csvout + '\n')
-            my_output_obj.close()
+            with open(errors_file, 'w') as my_output_obj:
+                my_output_obj.write(csvout + '\n')
     else:
         csvout = 'site: %s orgid: %s ErrorOccured: %s'  % (sitename, orgid, results.status_code)
-        my_output_obj = open(errors_file, 'w')
-        my_output_obj.write(csvout + '\n')
-        my_output_obj.close()
+        with open(errors_file, 'w') as my_output_obj:
+            my_output_obj.write(csvout + '\n')
 
 if __name__ == '__main__':
     main()

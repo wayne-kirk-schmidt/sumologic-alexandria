@@ -15,8 +15,8 @@ Style:
     @version        0.9.0
     @author-name    Wayne Schmidt
     @author-email   wschmidt@sumologic.com
-    @license-name   GNU GPL
-    @license-url    http://www.gnu.org/licenses/gpl.html
+    @license-name   APACHE 2.0
+    @license-url    http://www.apache.org/licenses/LICENSE-2.0
 """
 
 __version__ = 0.90
@@ -123,10 +123,9 @@ def extractwash(glassfile):
         listindex = "." + str(index) + ".txt"
         targetfile = dstname.replace(".csv", listindex)
         dstfile = os.path.join(dstdir, targetfile)
-        fileobj = open(dstfile, "w")
-        fileobj.write(rowvalue)
-        fileobj.write('\n')
-        fileobj.close()
+        with open(dstfile, "w") as fileobj:
+            fileobj.write(rowvalue)
+            fileobj.write('\n')
         target_item = slqprep(dstfile)
         sumowash(target_item)
 
@@ -157,15 +156,15 @@ def sumowash(target_item):
 
     (srcfile, dstfile) = target_item.split('#')
 
-    srcfileobj = open(srcfile, "r")
-    dstfileobj = open(dstfile, "w")
-    filecontents = srcfileobj.read()
+    with open(srcfile, "r") as srcfileobj:
+        filecontents = srcfileobj.read()
 
-    dstfileobj.write('{}'.format('/*' + '\n'))
-    dstfileobj.write(BEGIN.format("    Queryname:", QUERYNAME + '\n'))
-    dstfileobj.write(BEGIN.format("    SourceUrl:", QUERYREPO + '\n'))
-    dstfileobj.write(BEGIN.format("    Author:", QUERYAUTH + '\n'))
-    dstfileobj.write('{}'.format('*/' + '\n'))
+    with open(dstfile, "w") as dstfileobj:
+        dstfileobj.write('{}'.format('/*' + '\n'))
+        dstfileobj.write(BEGIN.format("    Queryname:", QUERYNAME + '\n'))
+        dstfileobj.write(BEGIN.format("    SourceUrl:", QUERYREPO + '\n'))
+        dstfileobj.write(BEGIN.format("    Author:", QUERYAUTH + '\n'))
+        dstfileobj.write('{}'.format('*/' + '\n'))
 
     url_list = []
 

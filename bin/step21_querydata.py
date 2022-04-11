@@ -15,8 +15,8 @@ Style:
     @version        0.4.00
     @author-name    Wayne Schmidt
     @author-email   wschmidt@sumologic.com
-    @license-name   GNU GPL
-    @license-url    http://www.gnu.org/licenses/gpl.html
+    @license-name   APACHE 2.0
+    @license-url    http://www.apache.org/licenses/LICENSE-2.0
 """
 
 __version__ = 0.40
@@ -117,34 +117,33 @@ def querydata(srcfile):
     Additionally, it will calculate the frequency of keyword use
     """
 
-    srcfileobj = open(srcfile, "r")
-    filelines = srcfileobj.readlines()
+    with open(srcfile, "r") as srcfileobj:
+        filelines = srcfileobj.readlines()
 
-    with_delimiting_lines = True
-    start_regex = re.compile(r'/\*')
-    final_regex = re.compile(r'\*/')
-    querylines = []
-    group_list = []
+        with_delimiting_lines = True
+        start_regex = re.compile(r'/\*')
+        final_regex = re.compile(r'\*/')
+        querylines = []
+        group_list = []
 
-    inside_group = False
-    for linenl in filelines:
-        line = linenl.rstrip()
-        if inside_group:
-            if start_regex.match(line):
-                inside_group = False
+        inside_group = False
+        for linenl in filelines:
+            line = linenl.rstrip()
+            if inside_group:
+                if start_regex.match(line):
+                    inside_group = False
+                    if with_delimiting_lines:
+                        group.append(line)
+                    group_list.append(group)
+                else:
+                    querylines.append(line)
+            elif final_regex.match(line):
+                inside_group = True
+                group = []
                 if with_delimiting_lines:
                     group.append(line)
-                group_list.append(group)
-            else:
-                querylines.append(line)
-        elif final_regex.match(line):
-            inside_group = True
-            group = []
-            if with_delimiting_lines:
-                group.append(line)
-    srcfileobj.close()
 
-    build_wisdom(srcfile, querylines)
+        build_wisdom(srcfile, querylines)
 
 if __name__ == '__main__':
     main()
