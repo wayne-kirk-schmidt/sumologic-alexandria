@@ -44,22 +44,21 @@ Script Names and Purposes
 
 Scripts and Functions:
 
-    1. step11_getclients.py - get a list of organizational ids from a given deployment site
+```
+bin
+└── build
+    ├── step_001_listclients.py
+    ├── step_002_extractdata.py
+    └── step_003_writequery.py
+```
+* Listclients gets a list of clients from each deployment, and stores them into a configuration file
 
-    2. step12_glassdump.py - dump all consolidated queries for a given organizational id and site
+* Extractdata pulls down data in a CSV format, and writes out all queries used by each orgid
 
-    3. step13_extractquery.py - split queries into specific files and perform basic hygiene
+* Writequery converts the existing queries into a cleaner format, and annotates each query
 
-NOTE: in the future we will have scripts/modules to critique syntax, and offer improvement suggestions
+NOTE: each of the scripts support using a '-h' to display help
 
-    4. step21_querydata.py - query the information for a query or queries for a given orgid or orgids.
-
-NOTE: this can store the information into a pickle file for later use.
-
-    5. step22_unpickle.py	- this provides a summary of query information
-
-    6. step23_gherkin.py - this provides a fingerprint of all queries
-        
 To Do List:
 ===========
 
