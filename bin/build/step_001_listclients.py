@@ -2,24 +2,24 @@
 # -*- coding: utf-8 -*-
 
 """
-Explanation: Dumps the Sumo Logic GLASS client list for a given region into a CSV file
+Explanation: this script collects Sumo Logic clients from Glass
 
 Usage:
-    $ python cs11_getclients.py [ options ]
+    $ python step_001_listclients [ options ]
 
 Style:
     Google Python Style Guide:
     http://google.github.io/styleguide/pyguide.html
 
-    @name           getclients
-    @version        0.4.00
+    @name           step_001_listclients
+    @version        1.0.0
     @author-name    Wayne Schmidt
     @author-email   wschmidt@sumologic.com
     @license-name   APACHE 2.0
     @license-url    http://www.apache.org/licenses/LICENSE-2.0
 """
 
-__version__ = 0.40
+__version__ = 1.00
 __author__ = "Wayne Schmidt (wschmidt@sumologic.com)"
 
 import argparse
@@ -33,48 +33,76 @@ sys.dont_write_bytecode = 1
 
 PARSER = argparse.ArgumentParser(description="""
 
-This is designed as a sample converter of json files to csv format.
-It will keep the source and the destination file
+This downloads a list of clients by deployment, as a config for later stages
 
 """)
 
-PARSER.add_argument('-l', metavar='<site>', dest='sitename', help='glass site')
 PARSER.add_argument('-u', metavar='<user>', dest='username', help='specify username')
+
 PARSER.add_argument('-p', metavar='<pass>', dest='password', help='specify password')
-PARSER.add_argument('-o', metavar='<file>', dest='outputfile', help='specify outputfile')
+
+PARSER.add_argument('-s', metavar='<site>', default='all', dest='sitename', help='glass site')
+
+PARSER.add_argument('-d', metavar='<dumpdir>', default='/var/tmp/glassdump', \
+                    dest='dumpdir', help='specify dumpdir')
 
 ARGS = PARSER.parse_args()
 
 SITENAME = ARGS.sitename
-BASEURL = 'https://%s-monitor.sumologic.net/glass' % SITENAME
-JSONURL = '%s/api/json/datastore/searchable/exportjson' % BASEURL
-MYQUERY = '%s/organizations' % JSONURL
+GLASSTAG = 'glassdump'
+DUMPBASE = ARGS.dumpdir
+
+DEPLOYMENTDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../etc'))
+DEPLOYMENTLIST = os.path.join(DEPLOYMENTDIR, 'sitelist.cfg')
 
 if ARGS.username:
     os.environ["GLASSUSER"] = ARGS.username
+
 if ARGS.password:
     os.environ["GLASSPASS"] = ARGS.password
 
 try:
     GLASSPASS = os.environ['GLASSPASS']
     GLASSUSER = os.environ['GLASSUSER']
+
 except KeyError as myerror:
-    print('Environment Variable Not Set :: {} '.format(myerror.args[0]))
+    print(f'Environment Variable Not Set :: {myerror.args[0]}')
 
 def main():
     """
-    This is to dump the glass client list for a given region
-    It filter out the system and automation accounts
-    """
-    getclients()
-
-def getclients():
-    """
-    make a connection to the web interface, pull down information as a JSON payload
-    then convert the JSON payload into a CSV using pandas and cleanup/filter data
+    This loops through a list of deployments
     """
 
-    results = requests.get(MYQUERY, auth=(GLASSUSER, GLASSPASS))
+    deploymentlist = []
+
+    if SITENAME == 'all':
+        with open(DEPLOYMENTLIST, "r", encoding='utf8') as listobject:
+            deploymentlist = listobject.readlines()
+    else:
+        deploymentlist.append(SITENAME)
+
+    for deployment in deploymentlist:
+
+        deployment = deployment.rstrip()
+        baseurl = f'https://{deployment}-monitor.sumologic.net/glass'
+        jsonurl = f'{baseurl}/api/json/datastore/searchable/exportjson'
+        myquery = f'{jsonurl}/organizations'
+
+        dumpdir = os.path.join(DUMPBASE, 'cfg', deployment )
+        os.makedirs(dumpdir, exist_ok = True)
+
+        glassfile = f'{deployment}.csv'
+        dumpfile = os.path.join(dumpdir, glassfile)
+
+        glassdump(myquery,deployment,dumpfile)
+
+def glassdump(glassquery,mylocation,outputfile):
+    """
+    This dumps the file from JSON into CSV to be used later
+    """
+
+    results = requests.get(glassquery, auth=(GLASSUSER, GLASSPASS))
+
     if 'content-length' in results.headers:
         jsonlength = int(results.headers['content-length'])
     else:
@@ -85,7 +113,7 @@ def getclients():
             dataframe = pandas.read_json(results.text)
             dataframe.to_csv()
             o_f = dataframe.loc[:, ['accountType', 'id', 'displayName']]
-            o_f['sitename'] = SITENAME
+            o_f['sitename'] = mylocation
             r_1 = re.compile(r'(,|\.|\s+|@|\&)', flags=re.IGNORECASE)
             r_2 = re.compile(r'_+', flags=re.IGNORECASE)
             r_3 = re.compile(r'_$', flags=re.IGNORECASE)
@@ -100,15 +128,13 @@ def getclients():
             g_f = o_f[~o_f.displayName.str.contains(r'automation|sumologic.com')]
             outcolumns = ['id', 'sitename', 'accountType', 'displayName']
             csvout = g_f.to_csv(columns=outcolumns, index=False, header=False)
-            if ARGS.outputfile:
-                with open(ARGS.outputfile, "w+") as outputobj:
-                    outputobj.write(csvout)
-            else:
-                print(csvout, end='')
+            with open(outputfile, "w+", encoding='utf8') as outputobj:
+                outputobj.write(csvout)
+            print(csvout, end='')
         else:
-            print('Site: {} Small_Payload: {}'.format(SITENAME, jsonlength))
+            print(f'Site: {mylocation} Small_Payload: {jsonlength}')
     else:
-        print('Error: {} OrgId: {}'.format(results.status_code, SITENAME))
+        print(f'Error: {results.status_code} OrgId: {mylocation}')
 
 if __name__ == '__main__':
     main()

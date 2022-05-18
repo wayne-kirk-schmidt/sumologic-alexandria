@@ -5,21 +5,21 @@
 Explanation: Dumper for Sumo Logic GLASS rdscq maps supporting multiple workers
 
 Usage:
-    $ python  cs12_glassdump.py [ options ]
+    $ python  step_002_extractdata [ options ]
 
 Style:
     Google Python Style Guide:
     http://google.github.io/styleguide/pyguide.html
 
-    @name           glassdump
-    @version        0.4.00
+    @name           step_002_extractdata
+    @version        1.0.0
     @author-name    Wayne Schmidt
     @author-email   wschmidt@sumologic.com
     @license-name   APACHE 2.0
     @license-url    http://www.apache.org/licenses/LICENSE-2.0
 """
 
-__version__ = 0.40
+__version__ = 1.0
 __author__ = "Wayne Schmidt (wschmidt@sumologic.com)"
 
 import argparse
@@ -34,73 +34,79 @@ import pandas
 sys.dont_write_bytecode = 1
 PARSER = argparse.ArgumentParser(description="""
 
-This will pull down the appropriate data for all specified site and orgids
+This will pull down the raw rdscq data
 
 """)
 
-PARSER.add_argument('-l', metavar='<site>', dest='sitename', help='specify  glass site')
-PARSER.add_argument('-i', metavar='<orgid>', dest='orgid', help='specify orgid')
+PARSER.add_argument('-s', metavar='<site>', default='all', \
+                    dest='sitename', help='specify  glass site')
+
 PARSER.add_argument('-c', metavar='<config>', dest='config', help='specify  config')
+
 PARSER.add_argument('-u', metavar='<user>', dest='username', help='specify  username')
+
 PARSER.add_argument('-p', metavar='<pass>', dest='password', help='specify  password')
-PARSER.add_argument('-d', metavar='<dir>', dest='destdir', help='specify output dir')
-PARSER.add_argument('-w', metavar='<workers>', dest='workers', help='specify workers')
+
+PARSER.add_argument('-d', metavar='<dumpdir>', default='/var/tmp/glassdump', \
+                    dest='dumpdir', help='specify dumpdir')
+
+PARSER.add_argument('-w', metavar='<workers>', default=1, \
+                    dest='workers', help='specify workers')
 
 ARGS = PARSER.parse_args()
 
-if ARGS.username:
-    os.environ["GLASSUSER"] = ARGS.username
-if ARGS.password:
-    os.environ["GLASSPASS"] = ARGS.password
+SITENAME = ARGS.sitename
 
-WORKERS = 32
-if ARGS.workers:
-    WORKERS = int(ARGS.workers)
+GLASSUSER = ARGS.username
 
-DESTDIR = "/tmp"
+GLASSPASS = ARGS.password
 
-if ARGS.destdir:
-    DESTDIR = os.path.abspath((ARGS.destdir))
+DEPLOYMENTDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../etc'))
 
-try:
-    GLASSPASS = os.environ['GLASSPASS']
-    GLASSUSER = os.environ['GLASSUSER']
-except KeyError as myerror:
-    print('Environment Variable Not Set :: {} '.format(myerror.args[0]))
+DEPLOYMENTLIST = os.path.join(DEPLOYMENTDIR, 'sitelist.cfg')
 
-GLASS_DICT = {'rdscq' : 'query'}
-GLASS_LIST = list(GLASS_DICT.keys())
-GLASS_ORGS = []
+RIGHTNOW = datetime.datetime.now()
+
+DSTAMP = RIGHTNOW.strftime("%Y%m%d")
+TSTAMP = RIGHTNOW.strftime("%H%M%S")
+
+WORKERS = int(ARGS.workers)
+
+DUMPDIR = os.path.abspath((ARGS.dumpdir))
+
 WORKERQUEUE = queue.Queue()
 
 RIGHTNOW = datetime.datetime.now()
+
 DSTAMP = RIGHTNOW.strftime("%Y%m%d")
+
 TSTAMP = RIGHTNOW.strftime("%H%M%S")
 
 def main():
     """
-    The script will collect a list of the glass files for a given client
-    After doing so, it will write this to a local directory
+    This will look for a list of clients within a glass client config file
+    Using this file, it will create all of the queries it needs and use
+    A pool of workers to drain the queue.
     """
-    sitename = ARGS.sitename
-    orgid = ARGS.orgid
-    config = ARGS.config
 
-    if not config:
-        baseurl = 'https://%s-monitor.sumologic.net/glass' % sitename
-        jsonurl = '%s/api/json/datastore/searchable/exportjson' % baseurl
-        glassprep(jsonurl, sitename, orgid)
+    deploymentlist = []
+
+    if SITENAME == 'all':
+        with open(DEPLOYMENTLIST, "r", encoding='utf8') as listobject:
+            deploymentlist = listobject.readlines()
     else:
-        with open(config) as cfgobj:
+        deploymentlist.append(SITENAME)
+
+    for deployment in deploymentlist:
+        configfile = f'{DUMPDIR}/cfg/{deployment}/{deployment}.csv'
+        with open(configfile, 'r', encoding='utf8') as cfgobj:
             for cfgline in cfgobj:
                 orgid = cfgline.split(',')[0]
                 sitename = cfgline.split(',')[1]
-                baseurl = 'https://%s-monitor.sumologic.net/glass' % sitename
-                jsonurl = '%s/api/json/datastore/searchable/exportjson' % baseurl
+                baseurl = f'https://{sitename}-monitor.sumologic.net/glass'
+                jsonurl = f'{baseurl}/api/json/datastore/searchable/exportjson'
                 glassprep(jsonurl, sitename, orgid)
-                print('{},{},{}'.format(jsonurl, sitename, orgid))
-
-    sys.exit()
+                ### print(f'PREPARING: {sitename},{orgid},{jsonurl}')
 
     for _i in range(WORKERS):
         glassthread = Thread(target=glassworker)
@@ -115,11 +121,10 @@ def glassprep(jsonurl, sitename, orgid):
     The design is enqueue serially, and dequeue in parallel
     """
 
-    for glass_item in GLASS_LIST:
-        glass_query = '%s/%s?orgid=%s' % (jsonurl, glass_item, orgid)
-        glass_items = '%s#%s#%s#%s' % (sitename, orgid, glass_item, glass_query)
-        print('{}'.format(glass_items))
-        WORKERQUEUE.put(glass_items)
+    glass_item = 'rdscq'
+    glass_query = f'{jsonurl}/{glass_item}?orgid={orgid}'
+    glass_items = f'{sitename}#{orgid}#{glass_item}#{glass_query}'
+    WORKERQUEUE.put(glass_items)
 
 def glassworker():
     """
@@ -140,16 +145,16 @@ def createdirs(sitename, orgid):
     slq - normalized data
     """
 
-    dumpdir = '%s/cscontent/output/%s/%s' % (DESTDIR, sitename, orgid)
+    dumpdir = f'{DUMPDIR}/output/{sitename}/{orgid}'
     os.makedirs(dumpdir, exist_ok=True)
 
-    txt_dir = '%s/txt' % dumpdir
+    txt_dir = f'{DUMPDIR}/output/{sitename}/{orgid}/txt'
     os.makedirs(txt_dir, exist_ok=True)
 
-    csv_dir = '%s/csv' % dumpdir
+    csv_dir = f'{DUMPDIR}/output/{sitename}/{orgid}/csv'
     os.makedirs(csv_dir, exist_ok=True)
 
-    slq_dir = '%s/slq' % dumpdir
+    slq_dir = f'{DUMPDIR}/output/{sitename}/{orgid}/slq'
     os.makedirs(slq_dir, exist_ok=True)
 
     return csv_dir
@@ -157,16 +162,18 @@ def createdirs(sitename, orgid):
 def collectdata(target_item):
     """
     This collects the data and writes out to the output file.
-    It will call createdirs as a byproduct of the collectioin.
+    It will call createdirs as a byproduct of the collection.
     """
 
     (sitename, orgid, glass_item, glass_query) = target_item.split('#')
 
-    filelist = ['glass', sitename, orgid, glass_item, 'csv']
-    output_file = os.path.join(createdirs(sitename, orgid), (".".join(filelist)))
+    csvdir = createdirs(sitename, orgid)
 
-    filelist = ['glass', sitename, orgid, glass_item, DSTAMP, TSTAMP, 'err']
-    errors_file = os.path.join(createdirs(sitename, orgid), (".".join(filelist)))
+    print(f'PROCESSING: {orgid}')
+
+    csv_file = f'{csvdir}/glass.{sitename}.{orgid}.{glass_item}.csv'
+
+    err_file = f'{csvdir}/glass.{sitename}.{orgid}.{glass_item}.{DSTAMP}.{TSTAMP}.err'
 
     results = requests.get(glass_query, auth=(GLASSUSER, GLASSPASS))
     if 'content-length' in results.headers:
@@ -181,15 +188,15 @@ def collectdata(target_item):
             o_f['sitename'] = sitename
             outcolumns = ['id', 'sitename', 'query']
             csvout = o_f.to_csv(columns=outcolumns, index=False)
-            with open(output_file, 'w') as my_output_obj:
+            with open(csv_file, 'w', encoding='utf8') as my_output_obj:
                 my_output_obj.write(csvout + '\n')
         else:
-            csvout = 'site: %s orgid: %s SmallPayload: %s'  % (sitename, orgid, jsonlength)
-            with open(errors_file, 'w') as my_output_obj:
+            csvout = f'ISSUE: site: {sitename} orgid: {orgid} SmallPayload: {jsonlength}'
+            with open(err_file, 'w', encoding='utf8') as my_output_obj:
                 my_output_obj.write(csvout + '\n')
     else:
-        csvout = 'site: %s orgid: %s ErrorOccured: %s'  % (sitename, orgid, results.status_code)
-        with open(errors_file, 'w') as my_output_obj:
+        csvout = f'ISSUE: site: {sitename} orgid: {orgid} Error: {results.status_code}'
+        with open(err_file, 'w', encoding='utf8') as my_output_obj:
             my_output_obj.write(csvout + '\n')
 
 if __name__ == '__main__':
