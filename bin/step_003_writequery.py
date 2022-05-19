@@ -107,7 +107,6 @@ def main():
         deployment = deployment.rstrip()
         for csvfile in pathlib.Path(DUMPDIR).rglob('*rdscq.csv'):
             WORKERQUEUE.put(csvfile)
-            extractwash(csvfile)
 
     for _i in range(WORKERS):
         glassthread = Thread(target=glassworker)
