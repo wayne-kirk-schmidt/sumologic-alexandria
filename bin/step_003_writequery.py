@@ -151,14 +151,15 @@ def extractwash(glassfile):
     for index, rowvalue in datalist.iteritems():
 
         txtfile = f'{csvbase}.{str(index)}.txt'
-        slqfile = f'{slqbase}.{str(index)}.slq'
+        slqfile = f'{slqbase}.{str(index)}.txt'
+        profile = f'{slqbase}.{str(index)}.profile.txt'
 
         with open(txtfile, "w", encoding='utf8') as fileobj:
             fileobj.write(rowvalue)
             fileobj.write('\n')
-        sumowash(txtfile,slqfile)
+        sumowash(txtfile,slqfile,profile)
 
-def sumowash(mysrcfile,mydstfile):
+def sumowash(mysrcfile,mydstfile,myprofilefile):
     """
     This rewrites the input file to following standards
     For now this appends and regularizes white space.
@@ -175,6 +176,7 @@ def sumowash(mysrcfile,mydstfile):
         dstfileobj.write('{}'.format('*/' + '\n'))
 
         url_list = []
+        keyword_list = []
 
         for fileline in filecontents.splitlines():
             fileline = fileline.rstrip()
@@ -204,6 +206,7 @@ def sumowash(mysrcfile,mydstfile):
             for word in fileline.split():
                 if word in TERMSDICT.keys():
                     url_list.append(TERMSDICT[word])
+                    keyword_list.append(word)
 
         url_list = list(set(url_list))
 
@@ -211,6 +214,12 @@ def sumowash(mysrcfile,mydstfile):
         for url_ref in url_list:
             dstfileobj.write(FINAL.format("    Reference:", url_ref + '\n'))
         dstfileobj.write('{}'.format('*/' + '\n'))
+
+        with open(myprofilefile, "w", encoding='utf8') as profileobject:
+            keyword_string = "-".join(keyword_list)
+            profileobject.write(f'{mydstfile},{keyword_string}\n')
+
+    os.remove(mysrcfile)
 
 if __name__ == '__main__':
     main()

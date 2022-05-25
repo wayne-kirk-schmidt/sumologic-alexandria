@@ -27,6 +27,7 @@ import datetime
 import os
 import sys
 from threading import Thread
+from collections import defaultdict
 import queue
 import requests
 import pandas
@@ -82,6 +83,8 @@ DSTAMP = RIGHTNOW.strftime("%Y%m%d")
 
 TSTAMP = RIGHTNOW.strftime("%H%M%S")
 
+ERRORS = defaultdict(int)
+
 def main():
     """
     This will look for a list of clients within a glass client config file
@@ -114,6 +117,9 @@ def main():
         glassthread.start()
 
     WORKERQUEUE.join()
+  
+    for error_key, error_value in ERRORS.items():
+        print(f'ISSUES - {error_key} - {error_value}')
 
 def glassprep(jsonurl, sitename, orgid):
     """
@@ -135,45 +141,14 @@ def glassworker():
         collectdata(target_item)
         WORKERQUEUE.task_done()
 
-def createdirs(sitename, orgid):
-    """
-    This will create the directories required for the glass dump.
-    each directory will have files in each subdirectory of the dump directory.
-
-    csv - raw glass output
-    txt - extracted files from the csv files
-    slq - normalized data
-    """
-
-    dumpdir = f'{DUMPDIR}/output/{sitename}/{orgid}'
-    os.makedirs(dumpdir, exist_ok=True)
-
-    txt_dir = f'{DUMPDIR}/output/{sitename}/{orgid}/txt'
-    os.makedirs(txt_dir, exist_ok=True)
-
-    csv_dir = f'{DUMPDIR}/output/{sitename}/{orgid}/csv'
-    os.makedirs(csv_dir, exist_ok=True)
-
-    slq_dir = f'{DUMPDIR}/output/{sitename}/{orgid}/slq'
-    os.makedirs(slq_dir, exist_ok=True)
-
-    return csv_dir
-
 def collectdata(target_item):
     """
     This collects the data and writes out to the output file.
-    It will call createdirs as a byproduct of the collection.
     """
 
     (sitename, orgid, glass_item, glass_query) = target_item.split('#')
 
-    csvdir = createdirs(sitename, orgid)
-
     print(f'PROCESSING: {orgid}')
-
-    csv_file = f'{csvdir}/glass.{sitename}.{orgid}.{glass_item}.csv'
-
-    err_file = f'{csvdir}/glass.{sitename}.{orgid}.{glass_item}.{DSTAMP}.{TSTAMP}.err'
 
     results = requests.get(glass_query, auth=(GLASSUSER, GLASSPASS))
     if 'content-length' in results.headers:
@@ -188,16 +163,21 @@ def collectdata(target_item):
             o_f['sitename'] = sitename
             outcolumns = ['id', 'sitename', 'query']
             csvout = o_f.to_csv(columns=outcolumns, index=False)
+
+            dumpdir = f'{DUMPDIR}/output/{sitename}/{orgid}'
+            os.makedirs(dumpdir, exist_ok=True)
+
+            csv_dir = f'{DUMPDIR}/output/{sitename}/{orgid}/csv'
+            os.makedirs(csv_dir, exist_ok=True)
+
+            csv_file = f'{csv_dir}/glass.{sitename}.{orgid}.{glass_item}.csv'
+
             with open(csv_file, 'w', encoding='utf8') as my_output_obj:
                 my_output_obj.write(csvout + '\n')
         else:
-            csvout = f'ISSUE: site: {sitename} orgid: {orgid} SmallPayload: {jsonlength}'
-            with open(err_file, 'w', encoding='utf8') as my_output_obj:
-                my_output_obj.write(csvout + '\n')
+            ERRORS['short-payload'] += 1
     else:
-        csvout = f'ISSUE: site: {sitename} orgid: {orgid} Error: {results.status_code}'
-        with open(err_file, 'w', encoding='utf8') as my_output_obj:
-            my_output_obj.write(csvout + '\n')
+        ERRORS[f'error-{results.status_code}'] += 1
 
 if __name__ == '__main__':
     main()
