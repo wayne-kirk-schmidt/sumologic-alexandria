@@ -117,7 +117,7 @@ def main():
         glassthread.start()
 
     WORKERQUEUE.join()
-  
+
     for error_key, error_value in ERRORS.items():
         print(f'ISSUES - {error_key} - {error_value}')
 
@@ -138,6 +138,7 @@ def glassworker():
     """
     while True:
         target_item = WORKERQUEUE.get()
+        print(target_item)
         collectdata(target_item)
         WORKERQUEUE.task_done()
 

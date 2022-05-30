@@ -1,0 +1,10 @@
+classifier,verb
+C,collect_data
+P,parse_data
+F,filter_data
+S,summarize_data
+O,data_operations
+D,display_data
+A,aggregate_data
+T,transform_data
+E,enrich_data

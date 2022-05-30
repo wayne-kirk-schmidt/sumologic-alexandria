@@ -146,8 +146,7 @@ def extractwash(glassfile):
 
     csv_data = pandas.read_csv(srcfile)
 
-    querytag = 'query'
-    datalist = csv_data.loc[:, querytag]
+    datalist = csv_data.loc[:, 'query']
     for index, rowvalue in datalist.iteritems():
 
         txtfile = f'{csvbase}.{str(index)}.txt'
