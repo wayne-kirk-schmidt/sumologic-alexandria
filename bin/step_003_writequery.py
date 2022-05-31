@@ -24,6 +24,7 @@ __author__ = "Wayne Schmidt (wschmidt@sumologic.com)"
 
 import argparse
 import os
+import csv
 import sys
 from threading import Thread
 import queue
@@ -58,6 +59,16 @@ DUMPDIR = ARGS.dumpdir
 DEPLOYMENTDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../etc'))
 
 DEPLOYMENTLIST = os.path.join(DEPLOYMENTDIR, 'sitelist.cfg')
+
+CLASSIFIERCFG = os.path.join(DEPLOYMENTDIR, 'classifier.csv')
+
+CLASSIFIERDICT = {}
+
+with open(CLASSIFIERCFG, 'r', encoding='utf8') as FILEOBJECT:
+    READEROBJECT = csv.reader(FILEOBJECT, delimiter=',')
+    for csvrow in READEROBJECT:
+        csvkey, csvvalue = csvrow
+        CLASSIFIERDICT[csvkey] = csvvalue
 
 RIGHTNOW = datetime.datetime.now()
 
@@ -205,7 +216,7 @@ def sumowash(mysrcfile,mydstfile,myprofilefile):
             for word in fileline.split():
                 if word in TERMSDICT.keys():
                     url_list.append(TERMSDICT[word])
-                    keyword_list.append(word)
+                    keyword_list.append(CLASSIFIERDICT[word])
 
         url_list = list(set(url_list))
 
