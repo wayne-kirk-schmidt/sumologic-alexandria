@@ -202,6 +202,8 @@ def sumowash(mysrcfile,mydstfile,myprofilefile):
             rem = re.match(r"(_\w+)\s?=\s?([\w|\S|\/]+)\s?((\S|\s+)+)?", fileline)
             if rem:
                 fileline = rem.groups()[0] + '=' + '"' + '{{data_source}}' + '"'
+                if rem.groups()[0] in CLASSIFIERDICT:
+                    keyword_list.append(CLASSIFIERDICT[rem.groups()[0]])
                 if rem.groups()[2]:
                     fileline = fileline + ' ' + rem.groups()[2]
 
@@ -213,9 +215,11 @@ def sumowash(mysrcfile,mydstfile,myprofilefile):
             fileline = fileline.lstrip()
 
             dstfileobj.write(fileline + '\n')
+            fileline = re.sub(r'\W+\s*', ' ', fileline)
             for word in fileline.split():
                 if word in TERMSDICT.keys():
                     url_list.append(TERMSDICT[word])
+                if word in CLASSIFIERDICT:
                     keyword_list.append(CLASSIFIERDICT[word])
 
         url_list = list(set(url_list))

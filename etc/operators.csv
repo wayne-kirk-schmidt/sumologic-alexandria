@@ -9,6 +9,7 @@ aaGroup,https://help.sumologic.com/Search/Search_Query_Language/aaGroup
 Transactionize,https://help.sumologic.com/Search/Search_Query_Language/Transaction_Analytics/Transactionize_operator
 aaGroup,https://help.sumologic.com/Search/Search_Query_Language/aaGroup
 fields,https://help.sumologic.com/Search/Search_Query_Language/Search_Operators/fields
+json,https://help.sumologic.com/05Search/Search-Query-Language/01-Parse-Operators/03-Parse-JSON-Formatted-Logs
 count,https://help.sumologic.com/05Search/Search-Query-Language/aaGroup/count%2C-count-distinct%2C-and-count-frequent
 avg,https://help.sumologic.com/05Search/Search-Query-Language/aaGroup/avg
 min,https://help.sumologic.com/05Search/Search-Query-Language/aaGroup/min-and-max
