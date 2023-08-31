@@ -5,7 +5,7 @@
 Explanation: Load Sumo Logic client queries stored by pickle
 
 Usage:
-   $ python cs22_unpickle.py [ options ]
+   $ python step_005_unpickle.py [ options ]
 
 Style:
    Google Python Style Guide:
@@ -13,14 +13,14 @@ Style:
 
     @name           unpickle
     @version        0.4.00
-    @author-name    Wayne Schmidt
-    @author-email   wschmidt@sumologic.com
+    @author-name    Wayne Kirk Schmidt
+    @author-email   wayne.kirk.schmidt@gmail.com
     @license-name   APACHE 2.0
     @license-url    http://www.apache.org/licenses/LICENSE-2.0
 """
 
 __version__ = 0.40
-__author__ = "Wayne Schmidt (wschmidt@sumologic.com)"
+__author__ = "Wayne Kirk Schmidt (wayne.kirk.schmidt@gmail.com)"
 
 import argparse
 import pickle
