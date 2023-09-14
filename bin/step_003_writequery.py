@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# pylint: disable=E1101
+# pylint: disable=C0209
+
 """
 Explanation: Extracts specific Sumo Logic client queries from the CSV dump file
 

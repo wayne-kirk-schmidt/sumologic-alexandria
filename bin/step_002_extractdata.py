@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# pylint: disable=E1101
+# pylint: disable=C0209
+
 """
 Explanation: Dumper for Sumo Logic GLASS rdscq maps supporting multiple workers
 
@@ -151,7 +154,7 @@ def collectdata(target_item):
 
     print(f'PROCESSING: {orgid}')
 
-    results = requests.get(glass_query, auth=(GLASSUSER, GLASSPASS))
+    results = requests.get(glass_query, auth=(GLASSUSER, GLASSPASS), timeout=15)
     if 'content-length' in results.headers:
         jsonlength = int(results.headers['content-length'])
     else:

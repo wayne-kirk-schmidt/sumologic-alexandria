@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# pylint: disable=E1101
+# pylint: disable=C0209
+
 """
 Explanation: Load Sumo Logic client queries stored by pickle
 

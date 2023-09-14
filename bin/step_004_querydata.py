@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# pylint: disable=E1101
+# pylint: disable=C0209
+# pylint: disable=C0325
+# pylint: disable=R1732
+# pylint: disable=C0201
+# pylint: disable=W1514
+
 """
 Explanation: Assemble information on Sumo Logic sanitized client queries
 
@@ -51,7 +58,7 @@ SCRIPTDIR = os.path.dirname(os.path.abspath(__file__))
 REFETCDIR = os.path.abspath(SCRIPTDIR.replace('bin', 'etc'))
 TERMSFILE = os.path.join(REFETCDIR, 'operators.csv')
 
-SUMOWISDOM = dict()
+SUMOWISDOM = {}
 PICKLEFILE = ARGS.picklefile
 
 def main():
@@ -97,12 +104,12 @@ def build_wisdom(srcfile, querylines):
     sli = int(sllist[4])
 
     if not sls in SUMOWISDOM.keys():
-        SUMOWISDOM[sls] = dict()
+        SUMOWISDOM[sls] = {}
     if not slo in SUMOWISDOM[sls].keys():
-        SUMOWISDOM[sls][slo] = dict()
+        SUMOWISDOM[sls][slo] = {}
     if not slt in SUMOWISDOM[sls][slo].keys():
-        SUMOWISDOM[sls][slo][slt] = dict()
-    SUMOWISDOM[sls][slo][slt][sli] = list()
+        SUMOWISDOM[sls][slo][slt] = {}
+    SUMOWISDOM[sls][slo][slt][sli] = []
 
     for queryline in querylines:
         queryline = (re.sub('[=()"]', ' ', queryline))

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# pylint: disable=E1101
+# pylint: disable=C0209
+
 """
 Explanation: this script collects Sumo Logic clients from Glass
 
@@ -101,7 +104,7 @@ def glassdump(glassquery,mylocation,outputfile):
     This dumps the file from JSON into CSV to be used later
     """
 
-    results = requests.get(glassquery, auth=(GLASSUSER, GLASSPASS))
+    results = requests.get(glassquery, auth=(GLASSUSER, GLASSPASS), timeout=15)
 
     if 'content-length' in results.headers:
         jsonlength = int(results.headers['content-length'])
